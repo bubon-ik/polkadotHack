@@ -8,13 +8,7 @@
 
 ## 📝 Overview
 
-**Polkadot Discovery Roulette** is an interactive web application that helps users discover high-quality projects in the Polkadot ecosystem through a gamified roulette system. Built for the **Polkadot Builder Party Hackathon 2025**, this app demonstrates:
-
-- 🔗 Polkadot.js wallet integration
-- 🎲 On-chain randomness using Paseo block hashes
-- ⏱️ Fair cooldown mechanism to prevent abuse
-- 🎨 Beautiful glassmorphism UI
-- 📱 Fully responsive design
+**Polkadot Discovery Roulette** is an interactive web application that helps users discover high-quality projects in the Polkadot ecosystem through a gamified roulette system. The app uses blockchain-powered randomness from Paseo testnet to ensure fair and verifiable project selection.
 
 ## ✨ Features
 
@@ -24,25 +18,15 @@
 - **Wallet Integration**: Seamless connection with Polkadot.js Extension
 - **Smart Cooldown System**: 10-second cooldown between spins to ensure fair usage
 - **No Duplicates**: Each project appears only once per session
-- **Curated Project Database**: 20 high-quality Polkadot ecosystem projects across multiple categories
+- **Custom Projects**: Users can add their own projects to the roulette
+- **Session Persistence**: Progress saved locally across page reloads
 
 ### User Experience
 
 - **Glassmorphism UI**: Modern, elegant interface with glass-morphic design elements
 - **Real-time Updates**: Instant feedback and state updates
-- **Session Persistence**: Your progress is saved locally
 - **Mobile Responsive**: Works beautifully on all devices
-- **Accessibility**: WCAG compliant with keyboard navigation support
-
-## 🎯 Hackathon Compliance
-
-### Polkadot Builder Party Hackathon 2025
-
-- ✅ **Theme**: User-centric Apps / Polkadot Tinkerers
-- ✅ **Polkadot Stack**: Uses @polkadot/api and Paseo testnet
-- ✅ **Public Repository**: Fully open source on GitHub
-- ✅ **Demo Video**: See [demo video link]
-- ✅ **Submission Deadline**: Before November 17, 2025
+- **Project Database**: Curated Polkadot ecosystem projects across multiple categories
 
 ## 🚀 Quick Start
 
@@ -50,23 +34,19 @@
 
 - Node.js 18+ and npm/yarn/pnpm
 - Polkadot.js Extension ([Install here](https://polkadot.js.org/extension/))
-- A Paseo testnet account
+- A Paseo testnet account (optional, for transactions)
 
 ### Installation
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/yourusername/polkadot-discovery-roulette.git
-cd polkadot-discovery-roulette/event-platform
+git clone https://github.com/bubon-ik/polkadotHack.git
+cd polkadotHack/event-platform
 ```
 
 2. **Install dependencies**
 ```bash
 npm install
-# or
-yarn install
-# or
-pnpm install
 ```
 
 3. **Set up environment variables**
@@ -76,18 +56,14 @@ cp env.example .env.local
 
 The default configuration uses Paseo Asset Hub:
 ```env
-NEXT_PUBLIC_PASEO_RPC=wss://paseo-asset-hub-rpc.polkadot.io
-NEXT_PUBLIC_NETWORK_NAME=Paseo Asset Hub
-NEXT_PUBLIC_EXPLORER_URL=https://paseo-asset-hub.blockscout.com
+NEXT_PUBLIC_PASEO_RPC=wss://paseo-rpc.polkadot.io
+NEXT_PUBLIC_NETWORK_NAME=Paseo Testnet
+NEXT_PUBLIC_EXPLORER_URL=https://paseo.subscan.io
 ```
 
 4. **Run the development server**
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
 ```
 
 5. **Open your browser**
@@ -106,14 +82,15 @@ event-platform/
 │   ├── components/            # React components
 │   │   ├── WalletConnect.tsx  # Wallet connection UI
 │   │   ├── Roulette.tsx       # Main roulette component
-│   │   └── ProjectCard.tsx    # Project display card
+│   │   ├── ProjectCard.tsx    # Project display card
+│   │   └── AddProjectForm.tsx # Form to add custom projects
 │   ├── lib/                   # Core libraries
 │   │   └── polkadot.ts       # Polkadot API integration
 │   ├── store/                 # Zustand state management
 │   │   ├── useWalletStore.ts  # Wallet state
 │   │   └── useRouletteStore.ts # Roulette state
 │   ├── data/                  # Project database
-│   │   └── projects.ts        # Curated Polkadot projects
+│   │   └── projects.ts        # Curated + user projects
 │   └── types/                 # TypeScript definitions
 │       └── index.ts          
 ├── public/                    # Static assets
@@ -134,7 +111,7 @@ event-platform/
 
 ### Blockchain
 - **Network**: Polkadot Paseo Testnet
-- **RPC**: Paseo Asset Hub (`wss://paseo-asset-hub-rpc.polkadot.io`)
+- **RPC**: Multiple endpoints with fallback (Asset Hub, Relay Chain)
 - **API Library**: @polkadot/api v12.4+
 - **Wallet**: @polkadot/extension-dapp
 - **Randomness**: Block hash from Paseo finalized blocks
@@ -164,14 +141,7 @@ The roulette uses **true blockchain randomness** from Paseo testnet:
 4. Converts hash to a number and uses modulo to select a project
 5. Displays the randomly selected project
 
-```typescript
-// Simplified randomness logic
-const finalizedHash = await api.rpc.chain.getFinalizedHead();
-const block = await api.rpc.chain.getBlock(finalizedHash);
-const blockHash = block.block.header.parentHash.toHex();
-const randomValue = parseInt(blockHash.slice(-16), 16);
-const projectIndex = randomValue % availableProjects.length;
-```
+If blockchain connection fails, the app falls back to enhanced local randomness (timestamp + crypto + Math.random).
 
 ### Cooldown Mechanism
 
@@ -189,113 +159,109 @@ To prevent abuse and ensure fair usage:
 - Reset button to start fresh
 - Data persisted across page reloads
 
-## 🎯 Featured Projects
+### Custom Projects
 
-The app includes 20 curated projects across 6 categories:
+Users can add their own projects:
 
-- **Parachains**: Acala, Moonbeam, Astar, Subsocial
-- **DeFi**: Polkadex, HydraDX, Zeitgeist, Bifrost, Parallel, Interlay
-- **NFT**: Unique Network, RMRK
-- **Developer Tools**: Subscan, Polkadot.js, Substrate, Subsquid
-- **Infrastructure**: Phala, Interlay, Composable, KILT
-- **Governance**: Polkassembly
+1. Click "Add Project" button
+2. Fill in project details (name, description, URL, logo, category, tags)
+3. Project is saved to local storage
+4. Appears in roulette on next spin
 
-Each project includes:
-- Name and logo
-- Detailed description
-- Category and tags
-- Direct link to project website
+Custom projects are stored locally and persist across sessions.
 
-## 🧪 Testing
+## 🎯 Project Categories
 
-### Manual Testing Steps
+The app includes curated projects across 6 categories:
 
-1. **Wallet Connection**
-   - Install Polkadot.js Extension
-   - Create/import a Paseo account
-   - Connect wallet to the app
+- **Parachains**: Layer-1 blockchains in Polkadot ecosystem
+- **DeFi**: Decentralized finance protocols
+- **NFT**: Non-fungible token platforms
+- **Developer Tools**: Tools for building on Polkadot
+- **Infrastructure**: Core infrastructure projects
+- **Governance**: Governance and DAO platforms
 
-2. **Roulette Functionality**
-   - Click "Spin the Roulette"
-   - Verify random project appears
-   - Check cooldown timer activates
-   - Spin again after cooldown
-   - Verify no duplicate projects
-
-3. **Session Management**
-   - Discover multiple projects
-   - Refresh page (session should persist)
-   - Click "Reset Session"
-   - Verify fresh start
-
-## 📦 Deployment
-
-### Vercel (Recommended)
-
-1. Push your code to GitHub
-2. Import project in Vercel
-3. Add environment variables
-4. Deploy
-
-### Self-Hosting
+## 📦 Available Scripts
 
 ```bash
-# Build production bundle
+# Development server
+npm run dev
+
+# Production build
 npm run build
 
 # Start production server
 npm run start
+
+# Type checking
+npm run type-check
+
+# Linting
+npm run lint
 ```
 
-## 🎥 Demo Video
+## 🔧 Configuration
 
-[Link to demo video - 2-5 minutes showing:]
-- Wallet connection process
-- Spinning the roulette
-- Project discovery
-- Cooldown mechanism
-- Session management
+### Environment Variables
 
-## 🤝 Contributing
+Create a `.env.local` file with:
 
-We welcome contributions from the community! To add new projects:
+```env
+# Paseo RPC endpoint (optional, defaults to Asset Hub)
+NEXT_PUBLIC_PASEO_RPC=wss://paseo-asset-hub-rpc.polkadot.io
 
-1. Fork the repository
-2. Edit `src/data/projects.ts`
-3. Add your project following the existing format
-4. Submit a pull request
+# Network name for display
+NEXT_PUBLIC_NETWORK_NAME=Paseo Testnet
 
-### Project Guidelines
+# Explorer URL
+NEXT_PUBLIC_EXPLORER_URL=https://paseo.subscan.io
+```
 
-Projects must:
-- Be part of the Polkadot ecosystem
-- Have a working website/product
-- Provide value to users or developers
-- Include accurate information
+### RPC Endpoints
+
+The app tries multiple RPC endpoints in order:
+1. Paseo Asset Hub (most stable)
+2. Paseo Relay Chain
+3. Alternative endpoints (Dwellir, etc.)
+
+If all fail, the app continues to work but uses fallback randomness.
+
+## 🐛 Troubleshooting
+
+### WebSocket Connection Issues
+
+If you see "WebSocket connection failed" errors:
+
+1. **Check firewall/VPN**: Some networks block WebSocket connections
+2. **Try different network**: Use mobile hotspot or different Wi-Fi
+3. **App still works**: The roulette continues to function with fallback randomness
+
+### Wallet Connection Issues
+
+1. **Install Polkadot.js Extension**: Required for wallet functionality
+2. **Create/Import Account**: You need at least one account in the extension
+3. **Network not required**: The app connects to Paseo via RPC, wallet network setting doesn't matter
+
+### Transaction Signing Issues
+
+If transactions don't appear for signing:
+
+1. **Update metadata**: Go to Polkadot.js Apps → Settings → Metadata → Update
+2. **Check wallet**: Make sure wallet is unlocked
+3. **Network issues**: If WebSocket is blocked, transactions won't work (but app still functions)
 
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
-
-- **Polkadot**: For the amazing blockchain framework
-- **Parity Technologies**: For Substrate and Polkadot.js
-- **Paseo Testnet**: For providing a reliable test environment
-- **All Featured Projects**: For building in the Polkadot ecosystem
-
 ## 🔗 Links
 
-- **Live Demo**: [Add your deployment URL]
-- **GitHub**: https://github.com/yourusername/polkadot-discovery-roulette
+- **GitHub**: https://github.com/bubon-ik/polkadotHack
 - **Polkadot**: https://polkadot.network
-- **Paseo Explorer**: https://paseo-asset-hub.blockscout.com
+- **Paseo Explorer**: https://paseo.subscan.io
 - **Polkadot.js Extension**: https://polkadot.js.org/extension/
+- **Polkadot.js Apps**: https://polkadot.js.org/apps
 
 ---
 
-Built with ❤️ for the Polkadot Builder Party Hackathon 2025
-
-
-
-
+Built with ❤️ for the Polkadot ecosystem
