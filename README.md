@@ -292,13 +292,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Paseo Explorer**: https://paseo-asset-hub.blockscout.com
 - **Polkadot.js Extension**: https://polkadot.js.org/extension/
 
-## 📧 Contact
-
-- **Developer**: [Your Name]
-- **Email**: your.email@example.com
-- **Twitter**: @yourhandle
-- **Discord**: YourDiscord#0000
-
 ---
 
 Built with ❤️ for the Polkadot Builder Party Hackathon 2025
