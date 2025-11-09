@@ -71,16 +71,44 @@ export default function WalletConnect() {
     <div className="flex flex-col items-center gap-3">
       {extensionAvailable === false && (
         <div className="glass-panel px-4 py-2 rounded-lg bg-yellow-500/20 border border-yellow-500/30 text-sm max-w-md">
-          <p className="font-semibold mb-1">⚠️ Расширение не найдено</p>
+          <p className="font-semibold mb-1">⚠️ Extension Not Found</p>
           <p className="text-xs">
-            Установите <a href="https://polkadot.js.org/extension/" target="_blank" rel="noopener noreferrer" className="underline hover:text-polkadot-pink">Polkadot.js Extension</a> и обновите страницу
+            Install <a href="https://polkadot.js.org/extension/" target="_blank" rel="noopener noreferrer" className="underline hover:text-polkadot-pink">Polkadot.js Extension</a> and refresh the page
           </p>
+        </div>
+      )}
+      
+      {extensionAvailable !== false && (
+        <div className="glass-panel px-4 py-3 rounded-lg bg-green-500/20 border border-green-500/30 text-sm max-w-md">
+          <p className="font-semibold mb-2">✅ Ready to Use!</p>
+          <p className="text-xs text-left mb-2">
+            <strong>Important:</strong> You <strong>don't need</strong> to add Paseo network to your wallet!
+          </p>
+          <p className="text-xs text-left">
+            The app will connect to Paseo network via RPC automatically. Just select any account from your wallet and click "Connect Wallet".
+          </p>
+          <div className="mt-2 pt-2 border-t border-green-500/30">
+            <p className="text-xs text-yellow-300 mb-1">
+              💡 You need PAS tokens for transactions. Get them from{' '}
+              <a 
+                href="https://paritytech.github.io/polkadot-testnet-faucet/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="underline hover:text-yellow-200"
+              >
+                faucet
+              </a>
+            </p>
+            <p className="text-xs text-orange-300">
+              ⚠️ If transaction signing fails, you may need to add Paseo network manually in extension settings
+            </p>
+          </div>
         </div>
       )}
       
       {error && (
         <div className="glass-panel px-4 py-2 rounded-lg bg-red-500/20 border border-red-500/30 text-sm max-w-md">
-          <p className="font-semibold mb-1">❌ Ошибка подключения</p>
+          <p className="font-semibold mb-1">❌ Connection Error</p>
           <p className="text-xs">{error}</p>
         </div>
       )}
@@ -93,17 +121,17 @@ export default function WalletConnect() {
         {isConnecting ? (
           <span className="flex items-center gap-2">
             <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-            Подключение...
+            Connecting...
           </span>
         ) : (
-          'Подключить кошелек'
+          'Connect Wallet'
         )}
       </button>
       
       <p className="text-xs text-gray-400 text-center max-w-xs">
         {extensionAvailable === false 
-          ? 'Установите расширение Polkadot.js для продолжения'
-          : 'Подключите ваш Polkadot.js кошелек для начала'
+          ? 'Install Polkadot.js extension to continue'
+          : 'Connect your Polkadot.js wallet. You can use any account!'
         }
       </p>
     </div>

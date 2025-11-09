@@ -189,14 +189,54 @@ export const polkadotProjects: PolkadotProject[] = [
 ];
 
 /**
+ * Get user-added projects from localStorage
+ */
+export function getUserProjects(): PolkadotProject[] {
+  if (typeof window === 'undefined') return [];
+  
+  try {
+    const stored = localStorage.getItem('user-projects');
+    if (!stored) return [];
+    return JSON.parse(stored);
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Save user-added project to localStorage
+ */
+export function saveUserProject(project: PolkadotProject): void {
+  if (typeof window === 'undefined') return;
+  
+  try {
+    const existing = getUserProjects();
+    const updated = [...existing, project];
+    localStorage.setItem('user-projects', JSON.stringify(updated));
+  } catch (error) {
+    console.error('Failed to save user project:', error);
+  }
+}
+
+/**
+ * Get all projects (default + user-added)
+ */
+export function getAllProjects(): PolkadotProject[] {
+  return [...polkadotProjects, ...getUserProjects()];
+}
+
+/**
  * Get a random project based on block hash randomness
  */
 export function getRandomProject(
   randomSeed: number,
   excludedIds: string[] = []
 ): PolkadotProject | null {
+  // Get all projects (default + user-added)
+  const allProjects = getAllProjects();
+  
   // Filter out already discovered projects
-  const availableProjects = polkadotProjects.filter(
+  const availableProjects = allProjects.filter(
     (project) => !excludedIds.includes(project.id)
   );
 
@@ -213,7 +253,7 @@ export function getRandomProject(
  * Get all projects by category
  */
 export function getProjectsByCategory(category: string): PolkadotProject[] {
-  return polkadotProjects.filter((project) => project.category === category);
+  return getAllProjects().filter((project) => project.category === category);
 }
 
 /**
@@ -221,12 +261,27 @@ export function getProjectsByCategory(category: string): PolkadotProject[] {
  */
 export function searchProjects(query: string): PolkadotProject[] {
   const lowerQuery = query.toLowerCase();
-  return polkadotProjects.filter(
+  return getAllProjects().filter(
     (project) =>
       project.name.toLowerCase().includes(lowerQuery) ||
       project.description.toLowerCase().includes(lowerQuery) ||
       project.tags.some((tag) => tag.toLowerCase().includes(lowerQuery))
   );
+}
+
+/**
+ * Delete user-added project
+ */
+export function deleteUserProject(projectId: string): void {
+  if (typeof window === 'undefined') return;
+  
+  try {
+    const existing = getUserProjects();
+    const updated = existing.filter((p) => p.id !== projectId);
+    localStorage.setItem('user-projects', JSON.stringify(updated));
+  } catch (error) {
+    console.error('Failed to delete user project:', error);
+  }
 }
 
 

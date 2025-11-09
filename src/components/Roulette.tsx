@@ -1,9 +1,12 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouletteStore } from '@/store/useRouletteStore';
 import { useWalletStore } from '@/store/useWalletStore';
 import ProjectCard from './ProjectCard';
+import AddProjectForm from './AddProjectForm';
+import { saveUserProject, getAllProjects } from '@/data/projects';
+import type { PolkadotProject } from '@/types';
 
 export default function Roulette() {
   const { account } = useWalletStore();
@@ -18,6 +21,7 @@ export default function Roulette() {
     resetSession,
     clearError,
   } = useRouletteStore();
+  const [showAddForm, setShowAddForm] = useState(false);
 
   useEffect(() => {
     if (error) {
@@ -26,10 +30,20 @@ export default function Roulette() {
     }
   }, [error, clearError]);
 
+  const handleAddProject = (project: PolkadotProject) => {
+    saveUserProject(project);
+    setShowAddForm(false);
+    // Optionally refresh the page or show a success message
+    alert(`Project "${project.name}" successfully added! It will appear in the roulette on the next spin.`);
+  };
+
   const handleSpin = async () => {
     if (!account) return;
     await spin(account.address);
   };
+
+  const totalProjects = getAllProjects().length;
+  const remainingProjects = totalProjects - discoveredProjects.length;
 
   return (
     <div className="flex flex-col items-center gap-8 w-full max-w-4xl mx-auto px-4">
@@ -44,7 +58,7 @@ export default function Roulette() {
         
         <div className="glass-panel rounded-xl p-4 text-center">
           <div className="text-3xl font-bold text-polkadot-purple">
-            {20 - discoveredProjects.length}
+            {remainingProjects}
           </div>
           <div className="text-xs text-gray-400 mt-1">Remaining</div>
         </div>
@@ -62,7 +76,13 @@ export default function Roulette() {
       {/* Error Message */}
       {error && (
         <div className="glass-panel px-6 py-4 rounded-xl bg-red-500/20 border border-red-500/30 text-sm text-center max-w-md w-full">
-          {error}
+          <p className="font-semibold mb-1">⚠️ Warning</p>
+          <p>{error}</p>
+          {error.includes('transaction') && !error.includes('rejected') && (
+            <p className="text-xs mt-2 text-gray-400">
+              💡 This is not critical - the project is open and available. Transaction is only needed for on-chain recording.
+            </p>
+          )}
         </div>
       )}
 
@@ -84,7 +104,10 @@ export default function Roulette() {
             Discovering your next project...
           </div>
           <div className="text-sm text-gray-400 text-center">
-            Using Paseo block hash for randomness
+            Using randomness from Paseo blockchain
+          </div>
+          <div className="text-xs text-yellow-400 text-center mt-2">
+            ⚠️ After selecting a project, you'll need to sign a transaction in your wallet
           </div>
         </div>
       )}
@@ -97,8 +120,8 @@ export default function Roulette() {
             Ready to Discover?
           </div>
           <div className="text-sm text-gray-400 text-center max-w-md">
-            Click the spin button to discover a quality project from the Polkadot ecosystem.
-            Each spin is powered by on-chain randomness from Paseo testnet!
+            Click the "Spin the Roulette" button to discover a quality project from the Polkadot ecosystem.
+            Each spin uses randomness from Paseo testnet blockchain!
           </div>
         </div>
       )}
@@ -122,16 +145,35 @@ export default function Roulette() {
           )}
         </button>
 
-        {discoveredProjects.length > 0 && (
+        <div className="flex gap-3">
+          {discoveredProjects.length > 0 && (
+            <button
+              onClick={resetSession}
+              disabled={isSpinning}
+              className="px-6 py-3 bg-white/5 hover:bg-white/10 rounded-xl transition-all duration-200 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Reset Session
+            </button>
+          )}
+          
           <button
-            onClick={resetSession}
+            onClick={() => setShowAddForm(true)}
             disabled={isSpinning}
-            className="px-6 py-3 bg-white/5 hover:bg-white/10 rounded-xl transition-all duration-200 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-3 bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 rounded-xl transition-all duration-200 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
-            Reset Session
+            <span>➕</span>
+            Add Project
           </button>
-        )}
+        </div>
       </div>
+
+      {/* Add Project Form Modal */}
+      {showAddForm && (
+        <AddProjectForm
+          onAdd={handleAddProject}
+          onClose={() => setShowAddForm(false)}
+        />
+      )}
 
       {/* Info */}
       <div className="glass-panel rounded-xl p-6 max-w-2xl w-full">
@@ -146,7 +188,7 @@ export default function Roulette() {
           </li>
           <li className="flex items-start gap-2">
             <span className="text-polkadot-pink">•</span>
-            <span>Each spin uses Paseo block hash for true on-chain randomness</span>
+            <span>Each spin uses Paseo Relay Chain block hash for true blockchain randomness</span>
           </li>
           <li className="flex items-start gap-2">
             <span className="text-polkadot-pink">•</span>
@@ -154,7 +196,11 @@ export default function Roulette() {
           </li>
           <li className="flex items-start gap-2">
             <span className="text-polkadot-pink">•</span>
-            <span>No duplicate projects - discover all 20 unique projects!</span>
+            <span>No duplicates - discover all {totalProjects} unique projects!</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-polkadot-pink">•</span>
+            <span>You can add your own projects using the "Add Project" button</span>
           </li>
         </ul>
       </div>

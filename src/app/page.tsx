@@ -38,7 +38,7 @@ export default function Home() {
                     Polkadot Discovery Roulette
                   </h1>
                   <p className="text-xs sm:text-sm text-gray-400">
-                    Powered by Paseo Testnet
+                    Powered by Paseo Testnet (Relay Chain)
                   </p>
                 </div>
               </div>
