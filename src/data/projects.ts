@@ -229,3 +229,6 @@ export function searchProjects(query: string): PolkadotProject[] {
   );
 }
 
+
+
+

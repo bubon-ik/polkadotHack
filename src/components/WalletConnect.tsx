@@ -1,10 +1,22 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useWalletStore } from '@/store/useWalletStore';
 
 export default function WalletConnect() {
   const { isConnected, isConnecting, account, accounts, error, connect, disconnect, selectAccount, clearError } = useWalletStore();
+  const [extensionAvailable, setExtensionAvailable] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    // Check if extension is available
+    const checkExtension = async () => {
+      if (typeof window !== 'undefined') {
+        const { isExtensionAvailable } = await import('@/lib/polkadot');
+        setExtensionAvailable(isExtensionAvailable());
+      }
+    };
+    checkExtension();
+  }, []);
 
   useEffect(() => {
     if (error) {
@@ -57,31 +69,47 @@ export default function WalletConnect() {
 
   return (
     <div className="flex flex-col items-center gap-3">
+      {extensionAvailable === false && (
+        <div className="glass-panel px-4 py-2 rounded-lg bg-yellow-500/20 border border-yellow-500/30 text-sm max-w-md">
+          <p className="font-semibold mb-1">⚠️ Расширение не найдено</p>
+          <p className="text-xs">
+            Установите <a href="https://polkadot.js.org/extension/" target="_blank" rel="noopener noreferrer" className="underline hover:text-polkadot-pink">Polkadot.js Extension</a> и обновите страницу
+          </p>
+        </div>
+      )}
+      
       {error && (
         <div className="glass-panel px-4 py-2 rounded-lg bg-red-500/20 border border-red-500/30 text-sm max-w-md">
-          {error}
+          <p className="font-semibold mb-1">❌ Ошибка подключения</p>
+          <p className="text-xs">{error}</p>
         </div>
       )}
       
       <button
         onClick={connect}
-        disabled={isConnecting}
+        disabled={isConnecting || extensionAvailable === false}
         className="polkadot-button px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
       >
         {isConnecting ? (
           <span className="flex items-center gap-2">
             <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-            Connecting...
+            Подключение...
           </span>
         ) : (
-          'Connect Wallet'
+          'Подключить кошелек'
         )}
       </button>
       
       <p className="text-xs text-gray-400 text-center max-w-xs">
-        Connect your Polkadot.js wallet to start discovering projects
+        {extensionAvailable === false 
+          ? 'Установите расширение Polkadot.js для продолжения'
+          : 'Подключите ваш Polkadot.js кошелек для начала'
+        }
       </p>
     </div>
   );
 }
+
+
+
 

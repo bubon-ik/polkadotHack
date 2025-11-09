@@ -100,3 +100,6 @@ export default function ProjectCard({ project, isSpinning = false }: ProjectCard
   );
 }
 
+
+
+

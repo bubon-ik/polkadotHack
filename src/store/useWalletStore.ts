@@ -32,12 +32,10 @@ export const useWalletStore = create<WalletState>()(
         
         try {
           // Dynamically import Polkadot functions only on client side
-          const { connectWallet, initializeApi } = await import('@/lib/polkadot');
+          const { connectWallet } = await import('@/lib/polkadot');
           
-          // Initialize API connection
-          await initializeApi();
-          
-          // Connect to wallet
+          // Connect to wallet (doesn't require API connection)
+          // API will be initialized lazily when needed (e.g., for roulette)
           const accounts = await connectWallet();
           
           set({
@@ -45,6 +43,14 @@ export const useWalletStore = create<WalletState>()(
             account: accounts[0], // Select first account by default
             isConnected: true,
             isConnecting: false,
+          });
+          
+          // Initialize API in background (non-blocking)
+          // This allows wallet to connect even if RPC is temporarily unavailable
+          import('@/lib/polkadot').then(({ initializeApi }) => {
+            initializeApi().catch((err) => {
+              console.warn('⚠️ Background API initialization failed (non-critical):', err);
+            });
           });
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Failed to connect wallet';
